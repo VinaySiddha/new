@@ -1,29 +1,37 @@
-name: Azure Static Web Apps CI/CD
+
+name: Build and Deploy to Azure Static Web Apps
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build-and-deploy:
+   if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          submodules: true
-          lfs: false
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
+          node-version: '20' # Update this line to use Node.js 20
+
+      - name: Install Azure CLI
+        uses: azure/setup-azure-cli@v1
+
+      - name: Login to Azure
+        run: az login ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and Deploy to Azure Static Web Apps
+        uses: azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_OCEAN_014CF6900 }}
+          azure_static_web_apps_api_token: ${{secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_OCEAN_014CF6900 }}
+          # Add other deployment configuration options as needed
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
